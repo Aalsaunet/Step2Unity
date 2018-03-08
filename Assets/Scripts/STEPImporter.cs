@@ -10,6 +10,7 @@ public class STEPImporter : MonoBehaviour {
 
 	public string stepFilePath;
 	public bool debugStatements;
+	public Material defaultMaterial;
 	IntPtr geometricalBufferPtr = IntPtr.Zero;
 	IntPtr indexBufferPtr = IntPtr.Zero;
     Int32 vertexElementCount = 0;
@@ -46,7 +47,7 @@ public class STEPImporter : MonoBehaviour {
 		float[] vertexBuffer = new float[vertexElementCount];
 		float[] normalBuffer = new float[normalElementCount];
 		float[] uv2Buffer = new float[uv2ElementCount];
-		Int32[] triangleBuffer = new Int32[triangleElementCount];
+		int[] triangleBuffer = new int[triangleElementCount];
 		
 		// Possible might want: (int)Math.Min(dataBufLength, (long)Int32.MaxValue)
 		//Int32[] stopIndices = new Int32[] {vertexElementCount, (vertexElementCount + normalElementCount), (vertexElementCount + normalElementCount + uv2ElementCount), (vertexElementCount + normalElementCount + uv2ElementCount + triangleElementCount)};
@@ -62,8 +63,8 @@ public class STEPImporter : MonoBehaviour {
 			Marshal.FreeHGlobal(indexBufferPtr);
 		}        
 
-		foreach (Int32 index in triangleBuffer)
-			Debug.Log(index);
+		foreach (var value in triangleBuffer)
+			Debug.Log(value);
 
 		
 		Vector3[] vertices = new Vector3[vertexElementCount / 3];
@@ -83,11 +84,19 @@ public class STEPImporter : MonoBehaviour {
 		mesh.normals = normals;
 		mesh.uv2 = uv2s;
 		mesh.triangles = triangleBuffer;
+		
+		//TODO Remove
+		// int[] triangles2 = new int[2736];
+		// for (int i = 0; i < triangles2.Length; i++)
+		// 	triangles2[i] = triangleBuffer[i];
+		// mesh.triangles = triangles2;
 
 		GameObject model = new GameObject(Path.GetFileName(stepFilePath));
 		MeshFilter meshFilter = model.AddComponent<MeshFilter>();
 		meshFilter.mesh = mesh;
-		model.AddComponent<MeshRenderer>();	
+		
+		MeshRenderer meshRenderer = model.AddComponent<MeshRenderer>();	
+		meshRenderer.material = defaultMaterial;
 		
 		Instantiate(model, Vector3.zero, Quaternion.identity);	
 
