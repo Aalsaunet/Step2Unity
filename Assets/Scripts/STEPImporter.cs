@@ -19,16 +19,15 @@ public class STEPImporter : MonoBehaviour {
 	Int32 triangleElementCount = 0;
 	
 	[DllImport("STEPImport")]
-	private static extern int Get3DGeometry(string filepath, ref IntPtr geometricalBufferPtr, ref IntPtr indexBufferPtr, ref Int32 vertexCount, ref Int32 normalCount, ref Int32 uv2Count, ref Int32 triangleCount);
+	private static extern int Get3DGeometry(IntPtr stepFilePath, ref IntPtr geometricalBufferPtr, ref IntPtr indexBufferPtr, ref Int32 vertexCount, ref Int32 normalCount, ref Int32 uv2Count, ref Int32 triangleCount);
 
 	void Start () {
 		
 		System.Diagnostics.Stopwatch timer = (debugStatements) ? System.Diagnostics.Stopwatch.StartNew() : null;
 		
 		// Call the C++ dll with the file name
-		int returnCode = Get3DGeometry(stepFilePath, ref geometricalBufferPtr, ref indexBufferPtr, ref vertexElementCount, ref normalElementCount, ref uv2ElementCount, ref triangleElementCount);
+		int returnCode = Get3DGeometry(Marshal.StringToHGlobalAnsi(stepFilePath), ref geometricalBufferPtr, ref indexBufferPtr, ref vertexElementCount, ref normalElementCount, ref uv2ElementCount, ref triangleElementCount);
 		
-		Debug.Log("Number of unique indices: " + returnCode);
 		// TODO: Check the return code
 
 		if (debugStatements) {
@@ -49,8 +48,6 @@ public class STEPImporter : MonoBehaviour {
 		float[] uv2Buffer = new float[uv2ElementCount];
 		int[] triangleBuffer = new int[triangleElementCount];
 		
-		// Possible might want: (int)Math.Min(dataBufLength, (long)Int32.MaxValue)
-		//Int32[] stopIndices = new Int32[] {vertexElementCount, (vertexElementCount + normalElementCount), (vertexElementCount + normalElementCount + uv2ElementCount), (vertexElementCount + normalElementCount + uv2ElementCount + triangleElementCount)};
 		Int32[] startIndices = new Int32[] {0, vertexElementCount, (vertexElementCount + normalElementCount)};
 		try {
 			Marshal.Copy(new IntPtr(geometricalBufferPtr.ToInt32() + startIndices[0]), vertexBuffer, 0, vertexElementCount); 
@@ -62,10 +59,6 @@ public class STEPImporter : MonoBehaviour {
 			Marshal.FreeHGlobal(geometricalBufferPtr);
 			Marshal.FreeHGlobal(indexBufferPtr);
 		}        
-
-		foreach (var value in triangleBuffer)
-			Debug.Log(value);
-
 		
 		Vector3[] vertices = new Vector3[vertexElementCount / 3];
 		for (int i = 0, j = 0; j < vertexElementCount; i++, j += 3)
@@ -84,35 +77,13 @@ public class STEPImporter : MonoBehaviour {
 		mesh.normals = normals;
 		mesh.uv2 = uv2s;
 		mesh.triangles = triangleBuffer;
-		
-		//TODO Remove
-		// int[] triangles2 = new int[2736];
-		// for (int i = 0; i < triangles2.Length; i++)
-		// 	triangles2[i] = triangleBuffer[i];
-		// mesh.triangles = triangles2;
 
 		GameObject model = new GameObject(Path.GetFileName(stepFilePath));
 		MeshFilter meshFilter = model.AddComponent<MeshFilter>();
 		meshFilter.mesh = mesh;
-		
+		//meshFilter.mesh.RecalculateNormals();
+
 		MeshRenderer meshRenderer = model.AddComponent<MeshRenderer>();	
-		meshRenderer.material = defaultMaterial;
-		
-		Instantiate(model, Vector3.zero, Quaternion.identity);	
-
-		Debug.Log("Triangles: " + meshFilter.mesh.triangles.Length);
-		if (debugStatements) {
-			Debug.Log("Time spent generating Unity meshes: " + timer.Elapsed.TotalSeconds + " seconds.");
-			timer.Reset();
-		}
-
-		// Int32[] triangleBuffer2 = new Int32[triangleBuffer.Length];
-		// for (int i = 0; i < triangleBuffer.Length; i++) {	
-		// 	Debug.Log("Index float value: " + triangleBuffer[i]);
-		// 	triangleBuffer2[i] = (Int32)triangleBuffer[i];
-		// 	Debug.Log("Index int value: " + triangleBuffer2[i]);
-		// }
-		// mesh.triangles = triangleBuffer2;
-		// //mesh.triangles = Array.ConvertAll(triangleBuffer, x => (int)x);
+		meshRenderer.material = defaultMaterial;	
 	}
 }
