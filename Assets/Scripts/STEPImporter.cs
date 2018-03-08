@@ -25,6 +25,7 @@ public class STEPImporter : MonoBehaviour {
 		
 		System.Diagnostics.Stopwatch timer = (debugStatements) ? System.Diagnostics.Stopwatch.StartNew() : null;
 		
+		string formattedFilePath = stepFilePath.Replace("\\", "\\\\");
 		// Call the C++ dll with the file name
 		int returnCode = Get3DGeometry(Marshal.StringToHGlobalAnsi(stepFilePath), ref geometricalBufferPtr, ref indexBufferPtr, ref vertexElementCount, ref normalElementCount, ref uv2ElementCount, ref triangleElementCount);
 		
