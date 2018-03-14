@@ -76,13 +76,13 @@ public class STEPImporter : MonoBehaviour {
 		Mesh mesh = new Mesh();
 		mesh.vertices = vertices;
 		mesh.normals = normals;
-		mesh.uv2 = uv2s;
+		//mesh.uv2 = uv2s;
 		mesh.triangles = triangleBuffer;
 
 		GameObject model = new GameObject(Path.GetFileName(stepFilePath));
 		MeshFilter meshFilter = model.AddComponent<MeshFilter>();
 		meshFilter.mesh = mesh;
-		//meshFilter.mesh.RecalculateNormals();
+		meshFilter.mesh.RecalculateNormals();
 
 		MeshRenderer meshRenderer = model.AddComponent<MeshRenderer>();	
 		meshRenderer.material = defaultMaterial;	

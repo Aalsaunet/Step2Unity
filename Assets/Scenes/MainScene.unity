@@ -220,7 +220,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stepFilePath: A:\Dimension10\repositories\STEPImporter\STEPImporter\Data\linkrods.step
   debugStatements: 1
-  defaultMaterial: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  defaultMaterial: {fileID: 2100000, guid: 85c805c6039869d4e92930aaeb570b7f, type: 2}
 --- !u!1 &1889541858
 GameObject:
   m_ObjectHideFlags: 0
