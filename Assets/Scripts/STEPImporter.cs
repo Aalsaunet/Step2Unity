@@ -17,6 +17,9 @@ public class STEPImporter : MonoBehaviour {
     Int32 vertexEntryCount = 0;
 	Int32 indexCount = 0;
 
+	int totalVertexCount = 0;
+	int totalTriangleCount = 0;
+
 	private Color[] defaultColorPalette;
 	private const float MAX_RGB_VALUE = 255f;
 	
@@ -28,7 +31,7 @@ public class STEPImporter : MonoBehaviour {
 	void Start () {
 		
 		PopulateColorPalettes();
-		//System.Diagnostics.Stopwatch timer = (debugStatements) ? System.Diagnostics.Stopwatch.StartNew() : null;	
+		System.Diagnostics.Stopwatch timer = (debugStatements) ? System.Diagnostics.Stopwatch.StartNew() : null;	
 		string formattedFilePath = stepFilePath.Replace("\\", "\\\\");
 		
 		int returnCode = ImportSTEPFile(Marshal.StringToHGlobalAnsi(stepFilePath), ref numberOfSubShapes);
@@ -70,9 +73,19 @@ public class STEPImporter : MonoBehaviour {
 			MeshRenderer meshRenderer = subobject.AddComponent<MeshRenderer>();	
 			meshRenderer.material = defaultMaterial;	
 			meshRenderer.material.color = defaultColorPalette[n % defaultColorPalette.Length];
+
+			totalVertexCount += vertices.Length;
+			totalTriangleCount += (managedIndexBuffer.Length / 3);
+
 		}
 		
-		// TODO: Check the return code	
+		if (debugStatements) {
+			Debug.Log("Number of failed translations: " + returnCode);
+			Debug.Log("Total time spent on Open Cascade geometry generation: " + timer.Elapsed.ToString());
+			Debug.Log("Total number of vertices: " + totalVertexCount);
+			Debug.Log("Total number of triangles: " + totalTriangleCount); 
+		}	
+		
 	}
 
 	private void PopulateColorPalettes()
@@ -106,14 +119,3 @@ public class STEPImporter : MonoBehaviour {
 		defaultColorPalette[i++] = new Color(202f / MAX_RGB_VALUE, 193f / MAX_RGB_VALUE, 110f / MAX_RGB_VALUE, 1f); // Dark yellow (#CAC16E)
     }
 }
-
-// if (debugStatements) {
-		// 	Debug.Log("Time spent on Open Cascade geometry generation: " + timer.Elapsed.TotalSeconds + " seconds.");
-		// 	timer.Reset();
-		// }
-		// if (debugStatements) {
-		// 	Debug.Log("Time spent on transfering the data to managed C# float arrays: " + timer.Elapsed.TotalSeconds + " seconds.");
-		// 	Debug.Log("Number of vertices: " + vertexEntryCount / 3);
-		// 	Debug.Log("Number of triangles: " + indexCount / 3); 
-		// 	timer.Reset();
-		// }
