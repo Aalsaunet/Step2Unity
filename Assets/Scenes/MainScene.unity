@@ -218,7 +218,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8c82251014ad334aaaec718f369918c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stepFilePath: D:\Models\STP\Sporveien\bombardier montaj1.STEP
+  stepFilePath: D:\Models\STP\Sporveien\ossz2.stp
   debugStatements: 1
   defaultMaterial: {fileID: 2100000, guid: 85c805c6039869d4e92930aaeb570b7f, type: 2}
 --- !u!1 &1889541858

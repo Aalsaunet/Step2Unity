@@ -40,6 +40,8 @@ public class STEPImporter : MonoBehaviour {
 			return;
 		
 		GameObject rootObject = new GameObject(Path.GetFileName(stepFilePath));
+		//Default unit for Open Cascade is millimeters, while it is meters for Unity.
+		rootObject.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f); 
 
 		for (Int32 n = 0; n < numberOfSubShapes; n++) {
 			
