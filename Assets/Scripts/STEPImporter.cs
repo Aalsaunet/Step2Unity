@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Text;
@@ -36,127 +35,19 @@ public class STEPImporter : MonoBehaviour {
 	private uint totalVertexCount = 0;
 	private uint totalTriangleCount = 0;
 
-	private string debugShapeIndicies;
-
-	private void GetSubShape(object subShapesToProcess) {
-
-		int[] subShapeIndexes = subShapesToProcess as int[];
-		StringBuilder sb = new StringBuilder();
-		foreach (int i in subShapeIndexes)
-			sb.Append(i + " ");
-		debugShapeIndicies += "\nSubshape indices: " + sb.ToString();
-		IntPtr vertexBuffer = IntPtr.Zero, indexBuffer = IntPtr.Zero;
-		Int32 vertexEntryCount = 0, indexCount = 0;
-
-		foreach (int index in subShapeIndexes) {
-			ProcessSubShape(index, ref vertexBuffer, ref vertexEntryCount, ref indexBuffer, ref indexCount);
-
-			float[] managedVertexBuffer = new float[vertexEntryCount];
-			int[] managedIndexBuffer = new int[indexCount];
-			
-			Marshal.Copy(vertexBuffer, managedVertexBuffer, 0, vertexEntryCount); 
-			Marshal.Copy(indexBuffer, managedIndexBuffer, 0, indexCount); 
-			Marshal.FreeHGlobal(vertexBuffer);
-			Marshal.FreeHGlobal(indexBuffer);  
-			
-			// Vector3[] vertices = new Vector3[vertexEntryCount / 3];
-			// for (int i = 0, j = 0; j < vertexEntryCount; i++, j += 3)
-			// 	vertices[i] = new Vector3(managedVertexBuffer[j], managedVertexBuffer[j + 1], managedVertexBuffer[j + 2]);
-
-			// GameObject subobject = new GameObject(Path.GetFileName(stepFilePath) + index);
-			// subobject.transform.parent = rootObject.transform;
-			// subobject.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f); //Default unit for Open Cascade is millimeters, while it is meters for Unity.
-			
-			// MeshFilter meshFilter = subobject.AddComponent<MeshFilter>();
-			// meshFilter.mesh.vertices = vertices;
-			// meshFilter.mesh.triangles = managedIndexBuffer;
-			// meshFilter.mesh.RecalculateNormals();
-
-			// MeshRenderer meshRenderer = subobject.AddComponent<MeshRenderer>();	
-			// meshRenderer.material = defaultMaterial;	
-			// meshRenderer.material.color = defaultColorPalette[index % defaultColorPalette.Length];
-
-			//totalVertexCount += (uint) vertices.Length;
-			//totalTriangleCount += (uint) (managedIndexBuffer.Length / 3);
-		}
-	}
-
-		private void GetSubShape2(int index) {
-		IntPtr vertexBuffer = IntPtr.Zero, indexBuffer = IntPtr.Zero;
-		Int32 vertexEntryCount = 0, indexCount = 0;
-
-		ProcessSubShape(index, ref vertexBuffer, ref vertexEntryCount, ref indexBuffer, ref indexCount);
-
-		float[] managedVertexBuffer = new float[vertexEntryCount];
-		int[] managedIndexBuffer = new int[indexCount];
-		
-		Marshal.Copy(vertexBuffer, managedVertexBuffer, 0, vertexEntryCount); 
-		Marshal.Copy(indexBuffer, managedIndexBuffer, 0, indexCount); 
-		Marshal.FreeHGlobal(vertexBuffer);
-		Marshal.FreeHGlobal(indexBuffer);  
-		
-		// Vector3[] vertices = new Vector3[vertexEntryCount / 3];
-		// for (int i = 0, j = 0; j < vertexEntryCount; i++, j += 3)
-		// 	vertices[i] = new Vector3(managedVertexBuffer[j], managedVertexBuffer[j + 1], managedVertexBuffer[j + 2]);
-
-		// GameObject subobject = new GameObject(Path.GetFileName(stepFilePath) + index);
-		// subobject.transform.parent = rootObject.transform;
-		// subobject.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f); //Default unit for Open Cascade is millimeters, while it is meters for Unity.
-		
-		// MeshFilter meshFilter = subobject.AddComponent<MeshFilter>();
-		// meshFilter.mesh.vertices = vertices;
-		// meshFilter.mesh.triangles = managedIndexBuffer;
-		// meshFilter.mesh.RecalculateNormals();
-
-		// MeshRenderer meshRenderer = subobject.AddComponent<MeshRenderer>();	
-		// meshRenderer.material = defaultMaterial;	
-		// meshRenderer.material.color = defaultColorPalette[index % defaultColorPalette.Length];
-
-		//totalVertexCount += (uint) vertices.Length;
-			//totalTriangleCount += (uint) (managedIndexBuffer.Length / 3);
-
-	}
-
-	void Start () {
+	void Start () {	
 		
 		PopulateColorPalettes();
 		System.Diagnostics.Stopwatch timer = (debugStatements) ? System.Diagnostics.Stopwatch.StartNew() : null;	
-		string formattedFilePath = stepFilePath.Replace("\\", "\\\\");
-		
-		int returnCode = ImportSTEPFile(Marshal.StringToHGlobalAnsi(stepFilePath), ref totalNumberOfSubShapes);
+		int returnCode = ImportSTEPFile(Marshal.StringToHGlobalAnsi(stepFilePath.Replace("\\", "\\\\")), ref totalNumberOfSubShapes);
 
-		if (debugStatements)
-			Debug.Log("Finding all sub shapes took: " + timer.Elapsed.ToString());
-
-		if (totalNumberOfSubShapes <= 0)
-			return;
+		if (debugStatements) Debug.Log("Finding all sub shapes took: " + timer.Elapsed.ToString());
+		if (totalNumberOfSubShapes <= 0) return;
 
 		rootObject = new GameObject(Path.GetFileName(stepFilePath));
-		
-		int nextShapeIndexToProcess = 0;
-		int threadCount = Environment.ProcessorCount - 3;
-		int shapesPerThread = (totalNumberOfSubShapes / threadCount);
-		int leftOverShapes = (totalNumberOfSubShapes % threadCount);
-
-		Thread[] availableThreads = new Thread[Environment.ProcessorCount];
-		availableThreads[0] = new Thread(GetSubShape);
-		availableThreads[0].Start(Enumerable.Range(nextShapeIndexToProcess, (shapesPerThread + leftOverShapes)).ToArray());
-		nextShapeIndexToProcess += (shapesPerThread + leftOverShapes);
-
-		for (int i = 1; i < availableThreads.Length; i++) {
-			//ThreadStart threadDelegate = new ThreadStart(GetSubShape);
-			availableThreads[i] = new Thread(GetSubShape);
-			availableThreads[i].Start(Enumerable.Range(nextShapeIndexToProcess, shapesPerThread).ToArray());
-			nextShapeIndexToProcess += shapesPerThread;
-		}
-
-		for (int i = 0; i < availableThreads.Length; i++)
-			availableThreads[i].Join();
-
-		// Parallel equivalent
-		// int[] indiciesTemp = Enumerable.Range(0, totalNumberOfSubShapes).ToArray();
-		// Parallel.ForEach(indiciesTemp, item => GetSubShape2(item));
-
+		for (int i = 0; i < totalNumberOfSubShapes; i++)
+			GetSubShape(i);
+			
 		ClearStepModelData();
 		
 		if (debugStatements) {
@@ -166,13 +57,49 @@ public class STEPImporter : MonoBehaviour {
 				"\nTotal number of vertices: " + totalVertexCount.ToString() +
 				"\nTotal number of triangles: " + totalTriangleCount.ToString()
 			); 
-			// Debug.Log("Number of failed translations: " + returnCode);
-			// Debug.Log("Total time spent on Open Cascade geometry generation: " + timer.Elapsed.ToString());
-			// Debug.Log("Total number of vertices: " + totalVertexCount.ToString());
-			// Debug.Log("Total number of triangles: " + totalTriangleCount.ToString()); 
-			Debug.Log(debugShapeIndicies);
 		}		
 	} 
+
+	private void GetSubShape(int subShapeIndex) {
+
+		IntPtr vertexBuffer = IntPtr.Zero, indexBuffer = IntPtr.Zero;
+		Int32 vertexEntryCount = 0, indexCount = 0;
+
+		ProcessSubShape(subShapeIndex, ref vertexBuffer, ref vertexEntryCount, ref indexBuffer, ref indexCount);
+
+		float[] managedVertexBuffer = new float[vertexEntryCount];
+		int[] managedIndexBuffer = new int[indexCount];
+
+		Marshal.Copy(vertexBuffer, managedVertexBuffer, 0, vertexEntryCount);
+		Marshal.Copy(indexBuffer, managedIndexBuffer, 0, indexCount);
+		Marshal.FreeHGlobal(vertexBuffer);
+		Marshal.FreeHGlobal(indexBuffer);
+
+		CreateGameObject(vertexEntryCount, subShapeIndex, managedVertexBuffer, managedIndexBuffer);
+    }
+
+    private void CreateGameObject(int vertexEntryCount, int index, float[] managedVertexBuffer, int[] managedIndexBuffer)
+    {
+        Vector3[] vertices = new Vector3[vertexEntryCount / 3];
+        for (int i = 0, j = 0; j < vertexEntryCount; i++, j += 3)
+            vertices[i] = new Vector3(managedVertexBuffer[j], managedVertexBuffer[j + 1], managedVertexBuffer[j + 2]);
+
+        GameObject subobject = new GameObject(Path.GetFileName(stepFilePath) + index);
+        subobject.transform.parent = rootObject.transform;
+        subobject.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f); //Default unit for Open Cascade is millimeters, while it is meters for Unity.
+
+        MeshFilter meshFilter = subobject.AddComponent<MeshFilter>();
+        meshFilter.mesh.vertices = vertices;
+        meshFilter.mesh.triangles = managedIndexBuffer;
+        meshFilter.mesh.RecalculateNormals();
+
+        MeshRenderer meshRenderer = subobject.AddComponent<MeshRenderer>();
+        meshRenderer.material = defaultMaterial;
+        meshRenderer.material.color = defaultColorPalette[index % defaultColorPalette.Length];
+
+        totalVertexCount += (uint)vertices.Length;
+        totalTriangleCount += (uint)(managedIndexBuffer.Length / 3);
+    }
 
 	private void PopulateColorPalettes()
     {
@@ -204,4 +131,23 @@ public class STEPImporter : MonoBehaviour {
         defaultColorPalette[i++] = new Color(255f / MAX_RGB_VALUE, 244f / MAX_RGB_VALUE, 145f / MAX_RGB_VALUE, 1f); // Pale yellow (#FFF491)
 		defaultColorPalette[i++] = new Color(202f / MAX_RGB_VALUE, 193f / MAX_RGB_VALUE, 110f / MAX_RGB_VALUE, 1f); // Dark yellow (#CAC16E)
     }
+
+		// int nextShapeIndexToProcess = 0;
+		// int threadCount = Environment.ProcessorCount;
+		// int shapesPerThread = (totalNumberOfSubShapes / threadCount);
+		// int leftOverShapes = (totalNumberOfSubShapes % threadCount);
+
+		// Thread[] availableThreads = new Thread[Environment.ProcessorCount];
+		// availableThreads[0] = new Thread(GetSubShape);
+		// availableThreads[0].Start(Enumerable.Range(nextShapeIndexToProcess, (shapesPerThread + leftOverShapes)).ToArray());
+		// nextShapeIndexToProcess += (shapesPerThread + leftOverShapes);
+
+		// for (int i = 1; i < availableThreads.Length; i++) {
+		// 	availableThreads[i] = new Thread(GetSubShape);
+		// 	availableThreads[i].Start(Enumerable.Range(nextShapeIndexToProcess, shapesPerThread).ToArray());
+		// 	nextShapeIndexToProcess += shapesPerThread;
+		// }
+
+		// for (int i = 0; i < availableThreads.Length; i++)
+		// 	availableThreads[i].Join();
 }
