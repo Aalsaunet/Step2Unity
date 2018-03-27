@@ -218,9 +218,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8c82251014ad334aaaec718f369918c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stepFilePath: D:\Models\STP\Sporveien\ossz2.stp
+  stepFilePath: A:\Dimension10\repositories\STEPImporter\STEPImporter\Data\linkrods.step
   debugStatements: 1
-  defaultMaterial: {fileID: 2100000, guid: 85c805c6039869d4e92930aaeb570b7f, type: 2}
+  defaultMaterials:
+  - {fileID: 2100000, guid: 85c805c6039869d4e92930aaeb570b7f, type: 2}
+  - {fileID: 2100000, guid: b4ad6bccecb4aa446a531b10c2b19d97, type: 2}
+  - {fileID: 2100000, guid: 3e041966da563d645848be536434f8b5, type: 2}
+  - {fileID: 2100000, guid: b1b486ba0884cfd49916bdb73b02b0df, type: 2}
+  - {fileID: 2100000, guid: 6c6da96df1ce57f4cb2c083a4de9a337, type: 2}
+  - {fileID: 2100000, guid: 2c3c727e94be09e4ca93bc80524e5dc2, type: 2}
+  - {fileID: 2100000, guid: 9f160cc382af5be4889b9c4e9f85a7f6, type: 2}
+  - {fileID: 2100000, guid: 6f5ecaca665102e44a673fe991153586, type: 2}
+  - {fileID: 2100000, guid: bcb02a22688ef764cac1a4129bf34bfc, type: 2}
+  - {fileID: 2100000, guid: dbf1450c107451245a0fda315fd77dd2, type: 2}
+  - {fileID: 2100000, guid: bd1eb34d3a8b5634387c901bfdb76188, type: 2}
+  - {fileID: 2100000, guid: e86246ebe860c6e4997e81184b4d423c, type: 2}
+  - {fileID: 2100000, guid: bd43b27a2171f7447b88c380f6a992b8, type: 2}
+  - {fileID: 2100000, guid: 1dbd40548c3c63d4aa0788cf151d0984, type: 2}
+  - {fileID: 2100000, guid: a65d0ea4e9ee9a04186c4c0c5ec83885, type: 2}
+  - {fileID: 2100000, guid: 239aeaeff3a14424fa85693369d540c7, type: 2}
+  - {fileID: 2100000, guid: a0d7b249d0ddbca4fb5b8c8169fb4936, type: 2}
 --- !u!1 &1889541858
 GameObject:
   m_ObjectHideFlags: 0
