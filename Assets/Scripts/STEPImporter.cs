@@ -59,7 +59,9 @@ public class STEPImporter : MonoBehaviour {
 		IntPtr vertexBuffer = IntPtr.Zero, indexBuffer = IntPtr.Zero;
 		Int32 vertexEntryCount = 0, indexCount = 0;
 
-		ProcessSubShape(subShapeIndex, ref vertexBuffer, ref vertexEntryCount, ref indexBuffer, ref indexCount);
+		int returncode = ProcessSubShape(subShapeIndex, ref vertexBuffer, ref vertexEntryCount, ref indexBuffer, ref indexCount);
+		if (returncode != 0)
+			return;
 
 		float[] managedVertexBuffer = new float[vertexEntryCount];
 		int[] managedIndexBuffer = new int[indexCount];

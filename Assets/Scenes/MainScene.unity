@@ -218,7 +218,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8c82251014ad334aaaec718f369918c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stepFilePath: A:\Dimension10\repositories\STEPImporter\STEPImporter\Data\linkrods.step
+  stepFilePath: D:\Models\Framo Services\1813103.stp
   debugStatements: 1
   defaultMaterials:
   - {fileID: 2100000, guid: 85c805c6039869d4e92930aaeb570b7f, type: 2}
